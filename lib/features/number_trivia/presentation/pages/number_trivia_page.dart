@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:number_trivia/features/number_trivia/presentation/bloc/number_trivia_bloc.dart';
-import 'package:number_trivia/features/number_trivia/presentation/bloc/number_trivia_state.dart';
+import 'package:number_trivia/features/number_trivia/presentation/bloc/bloc.dart';
+import 'package:number_trivia/features/number_trivia/presentation/widgets/widgets.dart';
 import 'package:number_trivia/injection_container.dart';
 
 class NumberTriviaPage extends StatelessWidget {
@@ -11,9 +11,8 @@ class NumberTriviaPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Number Trivia'),
       ),
-      body: BlocProvider(
-        builder: (_) => serviceLocator<NumberTriviaBloc>(),
-        child: Container(),
+      body: SingleChildScrollView(
+        child: buildBody(context),
       ),
     );
   }
@@ -33,58 +32,22 @@ class NumberTriviaPage extends StatelessWidget {
                   Widget widget;
                   if (state is Empty) {
                     widget = MessageDisplay(message: 'Start searching!');
+                  } else if (state is Loading) {
+                    widget = LoadingWidget();
+                  } else if (state is Error) {
+                    widget = MessageDisplay(message: state.message);
+                  } else if (state is Loaded) {
+                    widget = TriviaDisplay(
+                      numberTrivia: state.trivia,
+                    );
                   }
                   return widget;
                 },
               ),
               SizedBox(height: 20),
               // Bottom Half
-              Column(
-                children: <Widget>[
-                  // TextField
-                  Placeholder(fallbackHeight: 40),
-                  SizedBox(height: 10),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        // Search concrete button
-                        child: Placeholder(fallbackHeight: 30),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        // Random Button
-                        child: Placeholder(fallbackHeight: 30),
-                      )
-                    ],
-                  )
-                ],
-              )
+              TriviaControls(),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MessageDisplay extends StatelessWidget {
-  final String message;
-
-  const MessageDisplay({Key key, this.message})
-      : assert(message != null),
-        super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // Third of the size of the screen
-      height: MediaQuery.of(context).size.height / 3,
-      // Message Text Widgets / CircularLoadingIndicator
-      child: Center(
-        child: SingleChildScrollView(
-          child: Text(
-            message,
-            style: TextStyle(fontSize: 25),
-            textAlign: TextAlign.center,
           ),
         ),
       ),
